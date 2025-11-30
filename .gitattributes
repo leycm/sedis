@@ -1,0 +1,37 @@
+############################################################
+#  Git Attributes
+#  Controls line endings, text encoding, and merge behavior
+############################################################
+
+# Normalize line endings for all text files
+* text=auto eol=lf
+
+# Force Unix (LF) endings for scripts and Gradle files
+*.sh     text eol=lf
+*.gradle text eol=lf
+*.kts    text eol=lf
+
+# Java source files should always use LF
+*.java   text eol=lf
+
+# IDE configuration files as mergeable text
+*.iml text merge=union
+*.editorconfig text eol=lf
+*.gitignore text eol=lf
+*.gitattributes text eol=lf
+
+# Treat all binary files as binary (no diff, no conversion)
+*.jar binary
+*.war binary
+*.ear binary
+*.zip binary
+*.png binary
+*.jpg binary
+*.gif binary
+*.class binary
+*.exe binary
+*.dll binary
+*.so binary
+
+# Gradle Wrapper binary
+gradle/wrapper/gradle-wrapper.jar binary

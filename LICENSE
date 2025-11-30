@@ -1,0 +1,69 @@
+                        LECP-LICENSE
+                       Version 1, 2025
+
+ Copyright (C) 2025 LeyCM <leycm@proton.me>
+ Everyone is permitted to copy and distribute verbatim copies
+ of this license document, but changing it is not allowed.
+
+                            Preamble
+The LECP License is a permissive, attribution-focused license
+for software and other kinds of works.
+
+Unlike restrictive licenses, LECP is designed to let you use,
+modify, and share the work freely, while still encouraging
+acknowledgment of the original authors.  You can apply it to
+your programs or derivative works.
+
+When we speak of "freedom," we mean the freedom to copy,
+share, and adapt, not price.  This license ensures that you can
+distribute copies, access source code, modify works, and know
+you can do these things responsibly.
+
+To respect the rights of the original creators, you should
+declare original authorship in derivative works or distributions.
+
+Developers that use LECP protect your rights by giving you
+legal permission to copy, distribute, and/or modify their works,
+while disclaiming any warranty or liability.
+
+This license also discourages obscuring or hiding the origin
+of the work (e.g., obfuscation without attribution).
+
+                   Terms and Conditions
+
+Definitions:
+
+"This License" refers to version 1 of the LECP License.
+
+"The Program" refers to any copyrightable work licensed under
+this License.  "You" refers to the licensee.  "Use" includes
+running, copying, distributing, or modifying the work.
+
+Source Code:
+
+The "source code" is the preferred form for making modifications.
+"Object code" means any non-source form of a work.
+
+Permissions:
+
+You may use, copy, modify, and distribute the Program freely,
+provided that you give reasonable attribution to the original
+authors, for example in an "about" dialog, console output, or
+metadata in digital files. You are encouraged, but not required,
+to include the LECP License notice in derivative works.
+
+No Warranty:
+
+The Program is provided "as is," without any warranty of any
+kind.  The authors disclaim any liability for damages arising
+from its use.
+
+Anti-Circumvention:
+
+You should not obscure or misrepresent the origin of the work.
+Practices like code obfuscation without attribution are discouraged.
+
+The LECP License encourages attribution and sharing while
+remaining simple and flexible for developers.
+
+                  END OF LICENSE

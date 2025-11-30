@@ -1,0 +1,80 @@
+############################################################
+#  Git Ignore Rules
+#  Ignore build artifacts, IDE caches, temp files, etc.
+############################################################
+
+# ────────────────────
+#  Gradle
+# ────────────────────
+.gradle/
+build/
+gradle
+gradlew
+gradlew.bat
+
+# Output and runtime directories
+out/
+run/
+test/
+
+# ────────────────────
+#  IDEs
+# ────────────────────
+# IntelliJ IDEA
+*.iml
+*.iws
+.idea/
+.idea/*
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# NetBeans
+nbproject/private/
+nbbuild/
+dist/
+nbdist/
+*.nb-gradle/
+
+# VS Code
+.vscode/
+
+# ────────────────────
+#  OS Files
+# ────────────────────
+.DS_Store
+Thumbs.db
+ehthumbs.db
+
+# ────────────────────
+#  Temporary & Backup Files
+# ────────────────────
+*.tmp
+*.swp
+*.bak
+*.log
+*.lock
+
+# ────────────────────
+#  Generated / Build Output
+# ────────────────────
+**/generated/
+**/bin/
+**/libs/
+**/reports/
+
+# ────────────────────
+#  Dependency Caches
+# ────────────────────
+# Kotlin build caches
+.kotlinc/
+# Java annotation processors
+.annotation-processors/
+
+# ────────────────────
+#  Wrapper and Config
+# ────────────────────
+gradle-wrapper.properties
+gradle-wrapper.jar
