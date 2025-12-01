@@ -51,9 +51,8 @@ dependencyResolutionManagement {
 // ─────────────────────────────
 //  Project Includes
 // ─────────────────────────────
-rootProject.name = "ley-template"
+rootProject.name = "ley-sedis"
 
-include("api", "common")
+include("api")
 
-project(":api").projectDir = file("tmp-api")
-project(":common").projectDir = file("tmp-common")
+project(":api").projectDir = file("sed-api")

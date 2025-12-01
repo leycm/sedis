@@ -8,14 +8,18 @@
  * Copyright (c) maintainers <br>
  * Copyright (c) contributors
  */
-package de.leycm.template;
+package de.leycm.sedis;
 
 import de.leycm.neck.instance.Initializable;
 import lombok.NonNull;
 import org.jetbrains.annotations.Contract;
 
+import java.util.Optional;
+import java.util.UUID;
+import java.util.function.Function;
+
 /**
- * TemplateApiFactory
+ * LocalRedisCache
  *
  * <p>
  * Core interface for the Template API. Provides a singleton instance
@@ -28,10 +32,10 @@ import org.jetbrains.annotations.Contract;
  * @author LeyCM
  * @since 1.0.1
  */
-public interface TemplateApiFactory extends Initializable {
+public interface LocalRedisCache extends Initializable {
 
     /**
-     * Returns the singleton instance of the {@code TemplateApiFactory}.
+     * Returns the singleton instance of the {@code LocalRedisCache}.
      *
      * <p>
      * This method relies on the {@link Initializable#getInstance(Class)} mechanism to retrieve
@@ -39,13 +43,22 @@ public interface TemplateApiFactory extends Initializable {
      * {@link NullPointerException} is thrown.
      * </p>
      *
-     * @return the singleton instance of {@code TemplateApiFactory}
+     * @return the singleton instance of {@code LocalRedisCache}
      * @throws NullPointerException if no implementation is registered
      * @see Initializable#getInstance(Class)
      */
     @Contract(pure = true)
-    static @NonNull TemplateApiFactory getInstance() {
-        return Initializable.getInstance(TemplateApiFactory.class);
+    static @NonNull LocalRedisCache getInstance() {
+        return Initializable.getInstance(LocalRedisCache.class);
     }
+
+    <T> @NonNull Optional<T> get(final @NonNull String key,
+                                 final @NonNull Class<T> type);
+
+    void set(final @NonNull String key, final @NonNull Object value);
+
+    void delete(final @NonNull String key);
+
+    void deleteAll();
 
 }
