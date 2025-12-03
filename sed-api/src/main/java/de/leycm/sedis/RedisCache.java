@@ -15,11 +15,10 @@ import lombok.NonNull;
 import org.jetbrains.annotations.Contract;
 
 import java.util.Optional;
-import java.util.UUID;
-import java.util.function.Function;
+import java.util.Set;
 
 /**
- * LocalRedisCache
+ * RedisCache
  *
  * <p>
  * Core interface for the Template API. Provides a singleton instance
@@ -32,10 +31,10 @@ import java.util.function.Function;
  * @author LeyCM
  * @since 1.0.1
  */
-public interface LocalRedisCache extends Initializable {
+public interface RedisCache extends Initializable {
 
     /**
-     * Returns the singleton instance of the {@code LocalRedisCache}.
+     * Returns the singleton instance of the {@code RedisCache}.
      *
      * <p>
      * This method relies on the {@link Initializable#getInstance(Class)} mechanism to retrieve
@@ -43,13 +42,13 @@ public interface LocalRedisCache extends Initializable {
      * {@link NullPointerException} is thrown.
      * </p>
      *
-     * @return the singleton instance of {@code LocalRedisCache}
+     * @return the singleton instance of {@code RedisCache}
      * @throws NullPointerException if no implementation is registered
      * @see Initializable#getInstance(Class)
      */
     @Contract(pure = true)
-    static @NonNull LocalRedisCache getInstance() {
-        return Initializable.getInstance(LocalRedisCache.class);
+    static @NonNull RedisCache getInstance() {
+        return Initializable.getInstance(RedisCache.class);
     }
 
     <T> @NonNull Optional<T> get(final @NonNull String key,
@@ -57,8 +56,20 @@ public interface LocalRedisCache extends Initializable {
 
     void set(final @NonNull String key, final @NonNull Object value);
 
+    default <T> @NonNull RedisEntry<T> getEntry(final @NonNull String key,
+                                                final @NonNull Class<T> type) {
+        return new RedisEntry<>(this, type, key);
+    }
+
     void delete(final @NonNull String key);
 
     void deleteAll();
 
+    void sAdd(final @NonNull String key,
+                     final @NonNull String value);
+
+    void sRem(final @NonNull String key,
+                     final @NonNull String value);
+
+    @NonNull Set<String> sMembers(final @NonNull String key);
 }

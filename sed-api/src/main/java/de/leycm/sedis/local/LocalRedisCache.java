@@ -8,11 +8,12 @@
  * Copyright (c) maintainers <br>
  * Copyright (c) contributors
  */
-package de.leycm.sedis;
+package de.leycm.sedis.local;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
+import de.leycm.sedis.RedisCache;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Nullable;
@@ -21,14 +22,16 @@ import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.JedisPubSub;
 
+import java.util.Collections;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 /**
- * LocalRedisCache Implementation
+ * RedisCache Implementation
  *
  * <p>
  * Thread-safe Redis-based cache implementation with local in-memory caching
@@ -48,7 +51,7 @@ import java.util.concurrent.TimeUnit;
  * @since 1.0.1
  */
 @Slf4j
-public class MultiServiceRedisCache implements LocalRedisCache {
+public class LocalRedisCache implements RedisCache {
 
     private static final String INVALIDATE_CHANNEL = "cache:invalidate";
     private static final String INVALIDATE_ALL_CHANNEL = "cache:invalidate:all";
@@ -65,7 +68,7 @@ public class MultiServiceRedisCache implements LocalRedisCache {
      * @param redisHost the Redis server hostname
      * @param redisPort the Redis server port
      */
-    public MultiServiceRedisCache(@NonNull final String redisHost, final int redisPort) {
+    public LocalRedisCache(final @NonNull String redisHost, final int redisPort) {
         this(redisHost, redisPort, null);
     }
 
@@ -76,9 +79,9 @@ public class MultiServiceRedisCache implements LocalRedisCache {
      * @param redisPort     the Redis server port
      * @param redisPassword the Redis password (nullable)
      */
-    public MultiServiceRedisCache(final @NonNull String redisHost,
-                               final int redisPort,
-                               final @Nullable String redisPassword) {
+    public LocalRedisCache(final @NonNull String redisHost,
+                           final int redisPort,
+                           final @Nullable String redisPassword) {
         final JedisPoolConfig poolConfig = new JedisPoolConfig();
         poolConfig.setMaxTotal(20);
         poolConfig.setMaxIdle(10);
@@ -103,7 +106,7 @@ public class MultiServiceRedisCache implements LocalRedisCache {
         });
 
         startPubSubListener();
-        log.info("LocalRedisCache initialized with Redis at {}:{}", redisHost, redisPort);
+        log.info("RedisCache initialized with Redis at {}:{}", redisHost, redisPort);
     }
 
     /**
@@ -111,7 +114,7 @@ public class MultiServiceRedisCache implements LocalRedisCache {
      *
      * @param jedisPool the Redis password
      */
-    public MultiServiceRedisCache(final @NonNull JedisPool jedisPool) {
+    public LocalRedisCache(final @NonNull JedisPool jedisPool) {
 
         this.jedisPool = jedisPool;
 
@@ -127,12 +130,12 @@ public class MultiServiceRedisCache implements LocalRedisCache {
         });
 
         startPubSubListener();
-        log.info("LocalRedisCache initialized with existing RedisPool");
+        log.info("RedisCache initialized with existing RedisPool");
     }
 
     @Override
-    public <T> @NonNull Optional<T> get(@NonNull final String key,
-                                        @NonNull final Class<T> type) {
+    public <T> @NonNull Optional<T> get(final @NonNull String key,
+                                        final @NonNull Class<T> type) {
         if (isShutdown) {
             log.warn("Cache is shutdown, returning empty for key: {}", key);
             return Optional.empty();
@@ -168,7 +171,7 @@ public class MultiServiceRedisCache implements LocalRedisCache {
     }
 
     @Override
-    public void set(@NonNull final String key, @NonNull final Object value) {
+    public void set(final @NonNull String key, final @NonNull Object value) {
         if (isShutdown) {
             log.warn("Cache is shutdown, ignoring set operation for key: {}", key);
             return;
@@ -189,7 +192,7 @@ public class MultiServiceRedisCache implements LocalRedisCache {
     }
 
     @Override
-    public void delete(@NonNull final String key) {
+    public void delete(final @NonNull String key) {
         if (isShutdown) {
             log.warn("Cache is shutdown, ignoring delete operation for key: {}", key);
             return;
@@ -230,7 +233,7 @@ public class MultiServiceRedisCache implements LocalRedisCache {
         if (isShutdown) return;
 
         isShutdown = true;
-        log.info("Shutting down LocalRedisCache...");
+        log.info("Shutting down RedisCache...");
 
         pubSubExecutor.shutdown();
         try {
@@ -245,7 +248,7 @@ public class MultiServiceRedisCache implements LocalRedisCache {
         jedisPool.close();
         localCache.clear();
 
-        log.info("LocalRedisCache shut down successfully");
+        log.info("RedisCache shut down successfully");
     }
 
     /**
@@ -253,7 +256,7 @@ public class MultiServiceRedisCache implements LocalRedisCache {
      *
      * @param key the key to invalidate
      */
-    private void invalidateLocal(@NonNull final String key) {
+    private void invalidateLocal(final @NonNull String key) {
         localCache.remove(key);
         log.debug("Local cache invalidated for key: {}", key);
     }
@@ -304,4 +307,49 @@ public class MultiServiceRedisCache implements LocalRedisCache {
             log.info("PubSub listener stopped");
         });
     }
+
+    @Override
+    public void sAdd(final @NonNull String key,
+                     final @NonNull String value) {
+        if (isShutdown) {
+            log.warn("Cache is shutdown, ignoring sAdd for key: {}", key);
+            return;
+        }
+        try (final Jedis jedis = jedisPool.getResource()) {
+            jedis.sadd(key, value);
+            log.debug("Added '{}' to set '{}'", value, key);
+        } catch (Exception e) {
+            log.error("Error adding '{}' to set '{}'", value, key, e);
+        }
+    }
+
+    @Override
+    public void sRem(final @NonNull String key,
+                     final @NonNull String value) {
+        if (isShutdown) {
+            log.warn("Cache is shutdown, ignoring sRem for key: {}", key);
+            return;
+        }
+        try (final Jedis jedis = jedisPool.getResource()) {
+            jedis.srem(key, value);
+            log.debug("Removed '{}' from set '{}'", value, key);
+        } catch (Exception e) {
+            log.error("Error removing '{}' from set '{}'", value, key, e);
+        }
+    }
+
+    @Override
+    public @NonNull Set<String> sMembers(final @NonNull String key) {
+        if (isShutdown) {
+            log.warn("Cache is shutdown, returning empty set for '{}'", key);
+            return Collections.emptySet();
+        }
+        try (final Jedis jedis = jedisPool.getResource()) {
+            return jedis.smembers(key);
+        } catch (Exception e) {
+            log.error("Error fetching members of set '{}'", key, e);
+            return Collections.emptySet();
+        }
+    }
+
 }
