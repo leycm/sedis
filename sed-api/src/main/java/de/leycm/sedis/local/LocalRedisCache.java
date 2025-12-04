@@ -43,7 +43,6 @@ import java.util.concurrent.TimeUnit;
  *   <li><b>Redis persistence layer:</b> Ensures data durability and cross-instance consistency</li>
  *   <li><b>Pub/Sub synchronization:</b> Maintains cache coherence across distributed deployments</li>
  * </ol>
- * </p>
  *
  * <h2>Key Features</h2>
  * <ul>
