@@ -120,7 +120,7 @@ public record RedisRepository<T, K>(@NonNull RedisCache cache,
      */
     public void set(final @NonNull K key, final @NonNull T value) {
         cache.set(repoKey(key), value);
-        cache.sAdd(keySetName(), repoKey(key));
+        cache.add(keySetName(), repoKey(key));
     }
 
     /**
@@ -149,7 +149,7 @@ public record RedisRepository<T, K>(@NonNull RedisCache cache,
      */
     public void delete(final @NonNull K key) {
         cache.delete(repoKey(key));
-        cache.sRem(keySetName(), repoKey(key));
+        cache.rem(keySetName(), repoKey(key));
     }
 
     /**
@@ -162,7 +162,7 @@ public record RedisRepository<T, K>(@NonNull RedisCache cache,
      * @return a {@link Set} containing all repository keys
      */
     public @NonNull Set<K> getKeys() {
-        Set<String> storedKeys = cache.sMembers(keySetName());
+        Set<String> storedKeys = cache.members(keySetName());
         return storedKeys.stream()
                 .map(this::extractOriginalKey)
                 .map(key -> (K) key)

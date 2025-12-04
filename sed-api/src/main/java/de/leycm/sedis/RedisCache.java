@@ -10,6 +10,7 @@
  */
 package de.leycm.sedis;
 
+import com.google.gson.TypeAdapter;
 import de.leycm.neck.instance.Initializable;
 import lombok.NonNull;
 import org.jetbrains.annotations.Contract;
@@ -65,11 +66,14 @@ public interface RedisCache extends Initializable {
 
     void deleteAll();
 
-    void sAdd(final @NonNull String key,
-                     final @NonNull String value);
+    void add(final @NonNull String key,
+             final @NonNull String value);
 
-    void sRem(final @NonNull String key,
-                     final @NonNull String value);
+    void rem(final @NonNull String key,
+             final @NonNull String value);
 
-    @NonNull Set<String> sMembers(final @NonNull String key);
+    @NonNull Set<String> members(final @NonNull String key);
+
+    void clearCache();
+
 }
