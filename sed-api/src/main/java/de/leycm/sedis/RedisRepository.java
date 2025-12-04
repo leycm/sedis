@@ -7,8 +7,6 @@
  * Copyright (c) LeyCM <a href="mailto:leycm@proton.me">leycm@proton.me</a> l <br>
  * Copyright (c) maintainers <br>
  * Copyright (c) contributors
- *
- * @version 1.1.2
  */
 package de.leycm.sedis;
 
@@ -108,11 +106,11 @@ public record RedisRepository<T, K>(@NonNull RedisCache cache,
      * Stores an object in the repository with the specified key.
      * <p>
      * This method:
+     * </p>
      * <ol>
      *   <li>Stores the object in Redis using the generated repository key</li>
      *   <li>Adds the generated key to the tracking set</li>
      * </ol>
-     * </p>
      *
      * @param key   the object's key (must not be {@code null})
      * @param value the object to store (must not be {@code null})
@@ -138,11 +136,11 @@ public record RedisRepository<T, K>(@NonNull RedisCache cache,
      * Deletes an object from the repository.
      * <p>
      * This method:
+     * </p>
      * <ol>
      *   <li>Deletes the object from Redis</li>
      *   <li>Removes the key from the tracking set</li>
      * </ol>
-     * </p>
      *
      * @param key the object's key to delete (must not be {@code null})
      * @throws NullPointerException if {@code key} is {@code null}

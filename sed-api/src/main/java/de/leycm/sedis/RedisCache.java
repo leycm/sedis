@@ -10,7 +10,6 @@
  */
 package de.leycm.sedis;
 
-import com.google.gson.TypeAdapter;
 import de.leycm.neck.instance.Initializable;
 import lombok.NonNull;
 import org.jetbrains.annotations.Contract;

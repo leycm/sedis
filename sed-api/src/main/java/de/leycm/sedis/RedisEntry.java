@@ -7,8 +7,6 @@
  * Copyright (c) LeyCM <a href="mailto:leycm@proton.me">leycm@proton.me</a> l <br>
  * Copyright (c) maintainers <br>
  * Copyright (c) contributors
- *
- * @version 1.1.2
  */
 package de.leycm.sedis;
 

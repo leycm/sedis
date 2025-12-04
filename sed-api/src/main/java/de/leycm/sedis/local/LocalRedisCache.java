@@ -7,8 +7,6 @@
  * Copyright (c) LeyCM <a href="mailto:leycm@proton.me">leycm@proton.me</a> l <br>
  * Copyright (c) maintainers <br>
  * Copyright (c) contributors
- *
- * @version 1.1.2
  */
 package de.leycm.sedis.local;
 
@@ -63,12 +61,12 @@ import java.util.concurrent.TimeUnit;
  * <h2>Concurrency</h2>
  * <p>
  * All public methods are thread-safe. The implementation uses:
+ * </p>
  * <ul>
  *   <li>{@link ConcurrentHashMap} for local cache operations</li>
  *   <li>Jedis connection pooling for Redis operations</li>
  *   <li>Single-threaded executor for Pub/Sub handling</li>
  * </ul>
- * </p>
  *
  * @author LeyCM
  * @version 1.1.2
@@ -162,13 +160,13 @@ public class LocalRedisCache implements RedisCache {
      * Constructs a new LocalRedisCache instance with authentication support.
      * <p>
      * Initializes:
+     * </p>
      * <ol>
      *   <li>Jedis connection pool with optimized configuration</li>
      *   <li>Gson instance for JSON serialization</li>
      *   <li>Local concurrent cache</li>
      *   <li>Pub/Sub listener for cache invalidation</li>
      * </ol>
-     * </p>
      *
      * @param redisHost     the Redis server hostname (must not be {@code null})
      * @param redisPort     the Redis server port
@@ -209,9 +207,10 @@ public class LocalRedisCache implements RedisCache {
      * </p>
      *
      * @param jedisPool the existing Jedis connection pool (must not be {@code null})
+     * @param gson the existing Gson instance (must not be {@code null})
      * @throws NullPointerException if {@code jedisPool} is {@code null}
      */
-    public LocalRedisCache(final @NonNull JedisPool jedisPool, final Gson gson) {
+    public LocalRedisCache(final @NonNull JedisPool jedisPool, final @NonNull Gson gson) {
         this.jedisPool = jedisPool;
 
         this.gson = gson;
@@ -231,13 +230,13 @@ public class LocalRedisCache implements RedisCache {
      * Creates and configures a {@link JedisPoolConfig} with optimized settings.
      * <p>
      * Configuration includes:
+     * </p>
      * <ul>
      *   <li>Max total connections: 20</li>
      *   <li>Max idle connections: 10</li>
      *   <li>Min idle connections: 5</li>
      *   <li>Connection validation on borrow/return/idle</li>
      * </ul>
-     * </p>
      *
      * @return configured {@link JedisPoolConfig} instance
      */
@@ -256,6 +255,7 @@ public class LocalRedisCache implements RedisCache {
      * {@inheritDoc}
      * <p>
      * Implementation details:
+     * </p>
      * <ol>
      *   <li>Checks shutdown state - returns empty if shutdown</li>
      *   <li>Attempts to retrieve from local cache first</li>
@@ -263,7 +263,6 @@ public class LocalRedisCache implements RedisCache {
      *   <li>Handles type casting exceptions gracefully</li>
      *   <li>Returns {@link Optional#empty()} on any failure</li>
      * </ol>
-     * </p>
      *
      * @param <T>  the type of the cached object
      * @param key  the cache key (must not be {@code null})
@@ -288,7 +287,6 @@ public class LocalRedisCache implements RedisCache {
             } catch (ClassCastException e) {
                 log.warn("Type mismatch in local cache for key: {}, removing entry", key);
                 localCache.remove(key);
-                // Fall through to Redis query
             }
         }
 
@@ -316,13 +314,13 @@ public class LocalRedisCache implements RedisCache {
      * {@inheritDoc}
      * <p>
      * Implementation details:
+     * </p>
      * <ol>
      *   <li>Serializes object to JSON using Gson</li>
      *   <li>Stores in Redis with default persistence</li>
      *   <li>Updates local cache</li>
      *   <li>Publishes invalidation message to synchronize other instances</li>
      * </ol>
-     * </p>
      *
      * @param key   the cache key (must not be {@code null})
      * @param value the object to cache (must not be {@code null})
@@ -354,12 +352,12 @@ public class LocalRedisCache implements RedisCache {
      * {@inheritDoc}
      * <p>
      * Implementation details:
+     * </p>
      * <ol>
      *   <li>Deletes key from Redis</li>
      *   <li>Removes from local cache</li>
      *   <li>Publishes invalidation message to synchronize other instances</li>
      * </ol>
-     * </p>
      *
      * @param key the cache key to delete (must not be {@code null})
      * @throws NullPointerException if {@code key} is {@code null}
@@ -500,12 +498,14 @@ public class LocalRedisCache implements RedisCache {
      * Gracefully shuts down the cache instance.
      * <p>
      * Performs the following cleanup:
+     * </p>
      * <ol>
      *   <li>Sets shutdown flag to prevent new operations</li>
      *   <li>Stops Pub/Sub listener with 5-second timeout</li>
      *   <li>Closes Redis connection pool</li>
      *   <li>Clears local cache</li>
      * </ol>
+     * <p>
      * This method is idempotent - calling it multiple times has no additional effect.
      * </p>
      */
