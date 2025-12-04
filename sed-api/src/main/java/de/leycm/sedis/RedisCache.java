@@ -18,32 +18,38 @@ import java.util.Optional;
 import java.util.Set;
 
 /**
- * RedisCache
- *
+ * Core interface for Redis-based caching operations within the Template API.
+ * Provides a singleton access pattern and defines standard cache operations
+ * including retrieval, storage, deletion, and set-based operations.
  * <p>
- * Core interface for the Template API. Provides a singleton instance
- * via {@link #getInstance()} and defines a standard initialization contract
- * through {@link Initializable}.
+ * This interface extends {@link Initializable}, requiring implementations
+ * to follow a specific initialization lifecycle. Implementations must ensure
+ * thread safety as the cache may be accessed concurrently from multiple threads.
+ * </p>
+ * <p>
+ * All operations are designed to be non-blocking where possible and should
+ * handle Redis connection management internally. Keys should follow a consistent
+ * naming convention determined by the implementation.
  * </p>
  *
- * <p>Implementations should be thread-safe and initialized before use.</p>
- *
  * @author LeyCM
+ * @see Initializable
  * @since 1.0.1
  */
 public interface RedisCache extends Initializable {
 
     /**
-     * Returns the singleton instance of the {@code RedisCache}.
-     *
+     * Retrieves the singleton instance of {@code RedisCache} registered with
+     * the {@link Initializable} service loader mechanism.
      * <p>
-     * This method relies on the {@link Initializable#getInstance(Class)} mechanism to retrieve
-     * the registered implementation. If no implementation has been registered, a
-     * {@link NullPointerException} is thrown.
+     * This method provides global access to the cache implementation. The instance
+     * must be initialized via {@link Initializable#register(Initializable, Class)} before use to ensure proper
+     * connection establishment and resource allocation.
      * </p>
      *
-     * @return the singleton instance of {@code RedisCache}
-     * @throws NullPointerException if no implementation is registered
+     * @return the non-null singleton instance of {@code RedisCache}
+     * @throws NullPointerException if no implementation of {@code RedisCache}
+     *                              has been registered via the service loader
      * @see Initializable#getInstance(Class)
      */
     @Contract(pure = true)
@@ -51,28 +57,136 @@ public interface RedisCache extends Initializable {
         return Initializable.getInstance(RedisCache.class);
     }
 
+    /**
+     * Retrieves a value from the cache associated with the specified key,
+     * deserializing it to the requested type.
+     * <p>
+     * If the key does not exist or the deserialization fails (e.g., type mismatch),
+     * an empty {@link Optional} is returned. The method handles serialization
+     * format internally, typically using JSON or a binary format.
+     * </p>
+     *
+     * @param <T>  the expected type of the cached value
+     * @param key  the non-null cache key identifying the value
+     * @param type the non-null {@link Class} object representing {@code T}
+     * @return an {@link Optional} containing the deserialized value if present
+     *         and compatible, otherwise {@link Optional#empty()}
+     * @throws NullPointerException if {@code key} or {@code type} is null
+     */
     <T> @NonNull Optional<T> get(final @NonNull String key,
                                  final @NonNull Class<T> type);
 
-    void set(final @NonNull String key, final @NonNull Object value);
-
+    /**
+     * Creates a {@link RedisEntry} wrapper for a specific cache key and type.
+     * <p>
+     * This convenience method provides a more object-oriented way to interact
+     * with a cache entry, potentially offering a fluent API for subsequent
+     * operations like updates or deletion through the {@code RedisEntry} class.
+     * </p>
+     *
+     * @param <T>  the type associated with the cache entry
+     * @param key  the non-null cache key
+     * @param type the non-null {@link Class} object representing {@code T}
+     * @return a new, non-null {@link RedisEntry} instance bound to this cache,
+     *         the specified key, and type
+     * @throws NullPointerException if {@code key} or {@code type} is null
+     */
     default <T> @NonNull RedisEntry<T> getEntry(final @NonNull String key,
                                                 final @NonNull Class<T> type) {
         return new RedisEntry<>(this, type, key);
     }
 
+    /**
+     * Stores a value in the cache under the specified key.
+     * <p>
+     * The value is serialized according to the implementation's strategy
+     * (e.g., JSON). If the key already exists, its value is overwritten.
+     * The operation is typically atomic. The expiration policy (TTL) is
+     * determined by the implementation or configuration.
+     * </p>
+     *
+     * @param key   the non-null cache key
+     * @param value the non-null object to store
+     * @throws NullPointerException if {@code key} or {@code value} is null
+     */
+    void set(final @NonNull String key, final @NonNull Object value);
+
+    /**
+     * Removes the key-value pair associated with the specified key from the cache.
+     * <p>
+     * If the key does not exist, the operation has no effect. This is a
+     * non-blocking operation.
+     * </p>
+     *
+     * @param key the non-null key of the entry to delete
+     * @throws NullPointerException if {@code key} is null
+     */
     void delete(final @NonNull String key);
 
+    /**
+     * Removes all entries from the cache.
+     * <p>
+     * This operation typically uses the Redis {@code FLUSHDB} or {@code FLUSHALL}
+     * command, affecting all keys in the current database or all databases,
+     * depending on implementation. Use with extreme caution in production
+     * environments.
+     * </p>
+     */
     void deleteAll();
 
+    /**
+     * Adds a member to a Redis Set identified by the given key.
+     * <p>
+     * If the key does not exist, a new set is created containing the member.
+     * If the member already exists in the set, the operation is ignored.
+     * This operation corresponds to the Redis {@code SADD} command.
+     * </p>
+     *
+     * @param key   the non-null key identifying the set
+     * @param value the non-null member to add to the set
+     * @throws NullPointerException if {@code key} or {@code value} is null
+     */
     void add(final @NonNull String key,
              final @NonNull String value);
 
+    /**
+     * Removes a member from a Redis Set identified by the given key.
+     * <p>
+     * If the member does not exist in the set, the operation is ignored.
+     * If the set becomes empty after removal, the key is removed from the cache.
+     * This operation corresponds to the Redis {@code SREM} command.
+     * </p>
+     *
+     * @param key   the non-null key identifying the set
+     * @param value the non-null member to remove from the set
+     * @throws NullPointerException if {@code key} or {@code value} is null
+     */
     void rem(final @NonNull String key,
              final @NonNull String value);
 
+    /**
+     * Retrieves all members of a Redis Set identified by the given key.
+     * <p>
+     * Returns an empty set if the key does not exist. The returned {@link Set}
+     * is a snapshot of the set's members at the time of the call. This operation
+     * corresponds to the Redis {@code SMEMBERS} command.
+     * </p>
+     *
+     * @param key the non-null key identifying the set
+     * @return a non-null, potentially empty {@link Set} containing all members
+     * @throws NullPointerException if {@code key} is null
+     */
     @NonNull Set<String> members(final @NonNull String key);
 
+    /**
+     * Clears any internal client-side cache maintained by the implementation.
+     * <p>
+     * This method does not affect data stored in the Redis server. Its purpose
+     * is to invalidate any local, in-memory caches (e.g., read-through caches)
+     * that the {@code RedisCache} implementation might use to improve performance,
+     * forcing subsequent reads to fetch data directly from Redis.
+     * </p>
+     */
     void clearCache();
 
 }
