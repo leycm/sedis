@@ -37,6 +37,7 @@ import java.util.concurrent.TimeUnit;
  * optimization and Pub/Sub-based invalidation across multiple instances.
  * <p>
  * This class implements a two-level caching architecture:
+ * </p>
  * <ol>
  *   <li><b>Local in-memory cache:</b> Provides ultra-fast read access for frequently accessed items</li>
  *   <li><b>Redis persistence layer:</b> Ensures data durability and cross-instance consistency</li>
