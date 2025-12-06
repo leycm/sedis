@@ -123,8 +123,9 @@ public interface RedisCache extends Initializable {
      * @see RedisRepository
      */
     default <T, K> @NonNull RedisRepository<T, K> getRepo(final @NonNull Class<T> tClass,
-                                                          final @NonNull Function<K, String> keyMapper) {
-        return new RedisRepository<>(this, tClass, keyMapper);
+                                                          final @NonNull Function<K, String> keyMapper,
+                                                          final @NonNull Function<String, K> keyReMapper) {
+        return new RedisRepository<>(this, tClass, keyMapper, keyReMapper);
     }
 
     /**

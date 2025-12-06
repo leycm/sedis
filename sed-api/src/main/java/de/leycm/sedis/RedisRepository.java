@@ -76,9 +76,10 @@ import java.util.function.Function;
 @SuppressWarnings("ClassCanBeRecord")
 public class RedisRepository<T, K> implements Iterable<T> {
 
-    protected final @NonNull RedisCache cache;
-    protected final @NonNull Class<T> tClass;
-    protected final @NonNull Function<K, String> keyMapper;
+    protected final RedisCache cache;
+    protected final Class<T> tClass;
+    protected final Function<K, String> keyMapper;
+    protected final Function<String, K> keyReMapper;
 
     /**
      * Constructs a new {@code RedisRepository} with the specified cache, type, and key mapper.
@@ -91,11 +92,13 @@ public class RedisRepository<T, K> implements Iterable<T> {
     public RedisRepository(
             final @NonNull RedisCache cache,
             final @NonNull Class<T> tClass,
-            final @NonNull Function<K, String> keyMapper
+            final @NonNull Function<K, String> keyMapper,
+            final @NonNull Function<String, K> keyReMapper
     ) {
         this.cache = cache;
         this.tClass = tClass;
         this.keyMapper = keyMapper;
+        this.keyReMapper = keyReMapper;
     }
 
     /**
@@ -183,7 +186,7 @@ public class RedisRepository<T, K> implements Iterable<T> {
         Set<String> storedKeys = cache.members(keySetName());
         return storedKeys.stream()
                 .map(this::extractOriginalKey)
-                .map(key -> (K) key)
+                .map(this::parseKey)
                 .collect(java.util.stream.Collectors.toSet());
     }
 
@@ -202,6 +205,10 @@ public class RedisRepository<T, K> implements Iterable<T> {
         return tClass.getName() + ":" + keyMapper.apply(key);
     }
 
+    protected @NonNull K parseKey(final @NonNull String keyStr) {
+        return keyReMapper.apply(keyStr);
+    }
+
     /**
      * Extracts the original key from a full Redis key.
      * <p>
@@ -211,7 +218,7 @@ public class RedisRepository<T, K> implements Iterable<T> {
      * @param repoKey the full Redis key
      * @return the extracted original key as a string
      */
-    protected @NonNull String extractOriginalKey(@NonNull String repoKey) {
+    protected @NonNull String extractOriginalKey(final @NonNull String repoKey) {
         int idx = repoKey.indexOf(':');
         if (idx == -1 || idx + 1 >= repoKey.length()) return repoKey;
         return repoKey.substring(idx + 1);
