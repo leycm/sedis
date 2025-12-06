@@ -198,7 +198,7 @@ public class RedisRepository<T, K> implements Iterable<T> {
      * @param key the original key of type {@code K}
      * @return the full Redis key as a string
      */
-    private @NonNull String repoKey(final @NonNull K key) {
+    protected @NonNull String repoKey(final @NonNull K key) {
         return tClass.getName() + ":" + keyMapper.apply(key);
     }
 
@@ -211,7 +211,7 @@ public class RedisRepository<T, K> implements Iterable<T> {
      * @param repoKey the full Redis key
      * @return the extracted original key as a string
      */
-    private @NonNull String extractOriginalKey(@NonNull String repoKey) {
+    protected @NonNull String extractOriginalKey(@NonNull String repoKey) {
         int idx = repoKey.indexOf(':');
         if (idx == -1 || idx + 1 >= repoKey.length()) return repoKey;
         return repoKey.substring(idx + 1);
