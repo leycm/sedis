@@ -181,6 +181,10 @@ public abstract class RedisRepository<T, K> implements Iterable<T> {
                 .collect(java.util.stream.Collectors.toSet());
     }
 
+    protected abstract String mapKey(final @NonNull K key);
+
+    protected abstract K reMapKey(final @NonNull String key);
+
     /**
      * Generates the full Redis key for a repository object.
      * <p>
@@ -192,13 +196,9 @@ public abstract class RedisRepository<T, K> implements Iterable<T> {
      * @param key the original key of type {@code K}
      * @return the full Redis key as a string
      */
-    private @NonNull String repoKey(final @NonNull K key) {
+    protected @NonNull String repoKey(final @NonNull K key) {
         return tClass.getName() + ":" + mapKey(key);
     }
-
-    protected abstract String mapKey(final @NonNull K key);
-
-    protected abstract K reMapKey(final @NonNull String key);
 
     /**
      * Extracts the original key from a full Redis key.
