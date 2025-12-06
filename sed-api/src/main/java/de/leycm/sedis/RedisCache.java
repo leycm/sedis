@@ -125,7 +125,17 @@ public interface RedisCache extends Initializable {
     default <T, K> @NonNull RedisRepository<T, K> getRepo(final @NonNull Class<T> tClass,
                                                           final @NonNull Function<K, String> keyMapper,
                                                           final @NonNull Function<String, K> keyReMapper) {
-        return new RedisRepository<>(this, tClass, keyMapper, keyReMapper);
+        return new RedisRepository<>(this, tClass) {
+            @Override
+            protected String mapKey(@NonNull K key) {
+                return keyMapper.apply(key);
+            }
+
+            @Override
+            protected K reMapKey(@NonNull String key) {
+                return keyReMapper.apply(key);
+            }
+        };
     }
 
     /**

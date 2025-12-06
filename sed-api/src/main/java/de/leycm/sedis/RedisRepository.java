@@ -73,32 +73,24 @@ import java.util.function.Function;
  * @see Iterable
  */
 @Data // No Class can not be a record because of extension in future
-@SuppressWarnings("ClassCanBeRecord")
-public class RedisRepository<T, K> implements Iterable<T> {
+public abstract class RedisRepository<T, K> implements Iterable<T> {
 
     protected final RedisCache cache;
     protected final Class<T> tClass;
-    protected final Function<K, String> keyMapper;
-    protected final Function<String, K> keyReMapper;
 
     /**
      * Constructs a new {@code RedisRepository} with the specified cache, type, and key mapper.
      *
      * @param cache     the Redis cache instance (must not be {@code null})
      * @param tClass    the class type of the stored objects (must not be {@code null})
-     * @param keyMapper function to map keys of type {@code K} to string representations (must not be {@code null})
      * @throws NullPointerException if any parameter is {@code null}
      */
     public RedisRepository(
             final @NonNull RedisCache cache,
-            final @NonNull Class<T> tClass,
-            final @NonNull Function<K, String> keyMapper,
-            final @NonNull Function<String, K> keyReMapper
+            final @NonNull Class<T> tClass
     ) {
         this.cache = cache;
         this.tClass = tClass;
-        this.keyMapper = keyMapper;
-        this.keyReMapper = keyReMapper;
     }
 
     /**
@@ -185,7 +177,6 @@ public class RedisRepository<T, K> implements Iterable<T> {
     public @NonNull Set<K> getKeys() {
         Set<String> storedKeys = cache.members(keySetName());
         return storedKeys.stream()
-                .map(this::extractOriginalKey)
                 .map(this::reRepoKey)
                 .collect(java.util.stream.Collectors.toSet());
     }
@@ -201,19 +192,13 @@ public class RedisRepository<T, K> implements Iterable<T> {
      * @param key the original key of type {@code K}
      * @return the full Redis key as a string
      */
-    protected @NonNull String repoKey(final @NonNull K key) {
-        return tClass.getName() + ":" + keyMapper.apply(key);
+    private @NonNull String repoKey(final @NonNull K key) {
+        return tClass.getName() + ":" + mapKey(key);
     }
 
-    /**
-     * Parses the original key from its string representation.
-     *
-     * @param keyStr the string representation of the key
-     * @return the parsed key of type {@code K}
-     */
-    protected @NonNull K reRepoKey(final @NonNull String keyStr) {
-        return keyReMapper.apply(extractOriginalKey(keyStr));
-    }
+    protected abstract String mapKey(final @NonNull K key);
+
+    protected abstract K reMapKey(final @NonNull String key);
 
     /**
      * Extracts the original key from a full Redis key.
@@ -224,10 +209,10 @@ public class RedisRepository<T, K> implements Iterable<T> {
      * @param repoKey the full Redis key
      * @return the extracted original key as a string
      */
-    protected @NonNull String extractOriginalKey(final @NonNull String repoKey) {
+    protected @NonNull K reRepoKey(final @NonNull String repoKey) {
         int idx = repoKey.indexOf(':');
-        if (idx == -1 || idx + 1 >= repoKey.length()) return repoKey;
-        return repoKey.substring(idx + 1);
+        if (idx == -1 || idx + 1 >= repoKey.length()) return reMapKey(repoKey.substring(idx + 1));
+        return reMapKey(repoKey.substring(idx + 1));
     }
 
     /**
