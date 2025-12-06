@@ -10,6 +10,7 @@
  */
 package de.leycm.sedis;
 
+import lombok.Data;
 import lombok.NonNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,7 +19,7 @@ import java.util.Optional;
 /**
  * Type-safe wrapper for a single Redis cache entry with convenience methods.
  * <p>
- * This record provides a fluent API for common cache operations on a specific
+ * This class provides a fluent API for common cache operations on a specific
  * key with a known type. It encapsulates the cache instance, type information,
  * and key to simplify cache access patterns.
  * </p>
@@ -38,18 +39,35 @@ import java.util.Optional;
  * }</pre>
  *
  * @param <T> the type of the cached object
- * @param cache the underlying {@link RedisCache} instance
- * @param tClass the {@link Class} object representing type {@code T}
- * @param key the cache key for this entry
  * @author LeyCM
  * @version 1.1.2
  * @see RedisCache
  * @see Optional
  */
-public record RedisEntry<T>(@NonNull RedisCache cache,
-                            @NonNull Class<T> tClass,
-                            @NonNull String key) {
+@Data // No Class can not be a record because of extension in future
+@SuppressWarnings("ClassCanBeRecord")
+public class RedisEntry<T> {
 
+    protected final @NonNull RedisCache cache;
+    protected final @NonNull Class<T> tClass;
+    protected final @NonNull String key;
+
+
+    /**
+     * Constructs a new {@code RedisEntry} for the specified cache, type, and key.
+     *
+     * @param cache  the Redis cache instance (must not be {@code null})
+     * @param tClass the class type of the cached object (must not be {@code null})
+     * @param key    the key for this cache entry (must not be {@code null})
+     * @throws NullPointerException if any parameter is {@code null}
+     */
+    public RedisEntry(@NonNull RedisCache cache,
+                         @NonNull Class<T> tClass,
+                         @NonNull String key) {
+        this.cache = cache;
+        this.tClass = tClass;
+        this.key = key;
+    }
     /**
      * Retrieves the cached value for this entry.
      * <p>

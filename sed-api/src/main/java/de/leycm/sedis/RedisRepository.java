@@ -10,6 +10,7 @@
  */
 package de.leycm.sedis;
 
+import lombok.Data;
 import lombok.NonNull;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -66,17 +67,36 @@ import java.util.function.Function;
  *
  * @param <T> the type of objects stored in the repository
  * @param <K> the type of keys used to identify objects
- * @param cache the underlying {@link RedisCache} instance
- * @param tClass the {@link Class} object representing type {@code T}
- * @param keyMapper function that maps keys of type {@code K} to string representations
  * @author LeyCM
  * @version 1.1.2
  * @see RedisCache
  * @see Iterable
  */
-public record RedisRepository<T, K>(@NonNull RedisCache cache,
-                                    @NonNull Class<T> tClass,
-                                    @NonNull Function<K, String> keyMapper) implements Iterable<T> {
+@Data // No Class can not be a record because of extension in future
+@SuppressWarnings("ClassCanBeRecord")
+public class RedisRepository<T, K> implements Iterable<T> {
+
+    protected final @NonNull RedisCache cache;
+    protected final @NonNull Class<T> tClass;
+    protected final @NonNull Function<K, String> keyMapper;
+
+    /**
+     * Constructs a new {@code RedisRepository} with the specified cache, type, and key mapper.
+     *
+     * @param cache     the Redis cache instance (must not be {@code null})
+     * @param tClass    the class type of the stored objects (must not be {@code null})
+     * @param keyMapper function to map keys of type {@code K} to string representations (must not be {@code null})
+     * @throws NullPointerException if any parameter is {@code null}
+     */
+    public RedisRepository(
+            final @NonNull RedisCache cache,
+            final @NonNull Class<T> tClass,
+            final @NonNull Function<K, String> keyMapper
+    ) {
+        this.cache = cache;
+        this.tClass = tClass;
+        this.keyMapper = keyMapper;
+    }
 
     /**
      * Generates the Redis set key used to track all repository keys.
