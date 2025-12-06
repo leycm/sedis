@@ -16,6 +16,7 @@ import org.jetbrains.annotations.Contract;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 
 /**
  * Core interface for Redis-based caching operations within the Template API.
@@ -97,6 +98,36 @@ public interface RedisCache extends Initializable {
     }
 
     /**
+     * Creates a {@link RedisRepository} wrapper for managing collections of entities
+     * of a specific type with custom key mapping logic.
+     * <p>
+     * This method provides a repository pattern abstraction over the Redis cache,
+     * allowing for CRUD operations on entities of type {@code T} with keys of type {@code K}.
+     * The {@code keyMapper} function determines how entity identifiers are transformed
+     * into Redis cache keys, enabling flexible naming strategies.
+     * </p>
+     * <p>
+     * The returned repository supports operations like saving, retrieving, and deleting
+     * entities, as well as checking for existence, all while maintaining proper
+     * serialization/deserialization for the entity type.
+     * </p>
+     *
+     * @param <T>        the type of entities managed by the repository
+     * @param <K>        the type of entity identifiers (keys)
+     * @param tClass     the non-null {@link Class} object representing the entity type {@code T}
+     * @param keyMapper  the non-null function that maps entity identifiers of type {@code K}
+     *                   to Redis cache keys as {@link String}s
+     * @return a new, non-null {@link RedisRepository} instance bound to this cache,
+     *         the specified entity type, and key mapping function
+     * @throws NullPointerException if {@code tClass} or {@code keyMapper} is null
+     * @see RedisRepository
+     */
+    default <T, K> @NonNull RedisRepository<T, K> getRepo(final @NonNull Class<T> tClass,
+                                                          final @NonNull Function<K, String> keyMapper) {
+        return new RedisRepository<>(this, tClass, keyMapper);
+    }
+
+    /**
      * Stores a value in the cache under the specified key.
      * <p>
      * The value is serialized according to the implementation's strategy
@@ -110,6 +141,28 @@ public interface RedisCache extends Initializable {
      * @throws NullPointerException if {@code key} or {@code value} is null
      */
     void set(final @NonNull String key, final @NonNull Object value);
+
+    /**
+     * Checks whether a cache entry exists for the specified key.
+     * <p>
+     * This method performs a lightweight existence check without deserializing
+     * or loading the actual value. It is more efficient than {@link #get(String, Class)}
+     * when only the presence of a key needs to be verified.
+     * </p>
+     * <p>
+     * The check is performed by attempting to retrieve the value as a generic
+     * {@link Object} and verifying if the result is present. Implementations may
+     * optimize this operation using Redis-specific commands like {@code EXISTS}.
+     * </p>
+     *
+     * @param key the non-null cache key to check for existence
+     * @return {@code true} if the key exists in the cache and has an associated value,
+     *         {@code false} otherwise
+     * @throws NullPointerException if {@code key} is null
+     */
+    default boolean contains(final @NonNull String key) {
+        return get(key, Object.class).isPresent();
+    }
 
     /**
      * Removes the key-value pair associated with the specified key from the cache.
