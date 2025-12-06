@@ -186,7 +186,7 @@ public class RedisRepository<T, K> implements Iterable<T> {
         Set<String> storedKeys = cache.members(keySetName());
         return storedKeys.stream()
                 .map(this::extractOriginalKey)
-                .map(this::parseKey)
+                .map(this::reRepoKey)
                 .collect(java.util.stream.Collectors.toSet());
     }
 
@@ -205,8 +205,14 @@ public class RedisRepository<T, K> implements Iterable<T> {
         return tClass.getName() + ":" + keyMapper.apply(key);
     }
 
-    protected @NonNull K parseKey(final @NonNull String keyStr) {
-        return keyReMapper.apply(keyStr);
+    /**
+     * Parses the original key from its string representation.
+     *
+     * @param keyStr the string representation of the key
+     * @return the parsed key of type {@code K}
+     */
+    protected @NonNull K reRepoKey(final @NonNull String keyStr) {
+        return keyReMapper.apply(extractOriginalKey(keyStr));
     }
 
     /**
