@@ -19,7 +19,6 @@ import java.util.Iterator;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 
 /**
  * Repository pattern implementation for Redis cache that manages collections of typed objects.
@@ -211,7 +210,6 @@ public abstract class RedisRepository<T, K> implements Iterable<T> {
      */
     protected @NonNull K reRepoKey(final @NonNull String repoKey) {
         int idx = repoKey.indexOf(':');
-        if (idx == -1 || idx + 1 >= repoKey.length()) return reMapKey(repoKey.substring(idx + 1));
         return reMapKey(repoKey.substring(idx + 1));
     }
 
