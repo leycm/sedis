@@ -53,6 +53,6 @@ dependencyResolutionManagement {
 // ─────────────────────────────
 rootProject.name = "ley-sedis"
 
-include("api")
+include("sedis")
 
-project(":api").projectDir = file("sed-api")
+project(":sedis").projectDir = file("sed-api")
