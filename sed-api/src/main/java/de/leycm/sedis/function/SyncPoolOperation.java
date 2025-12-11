@@ -5,6 +5,6 @@ import de.leycm.sedis.SedisPool;
 import java.util.function.Function;
 
 @FunctionalInterface
-public interface SyncPoolOperation<R, P extends SedisPool> 
-        extends Function<R, P> {
+public interface SyncPoolOperation<P extends SedisPool, R>
+        extends Function<P, R> {
 }

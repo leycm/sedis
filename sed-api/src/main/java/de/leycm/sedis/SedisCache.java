@@ -1,11 +1,22 @@
 package de.leycm.sedis;
 
+import de.leycm.neck.instance.Initializable;
 import de.leycm.sedis.entries.*;
 import lombok.NonNull;
 
 import java.util.function.Function;
 
-public interface SedisCache extends SedisPool {
+public interface SedisCache extends SedisPool, Initializable {
+
+    default void connect() {
+        onInstall();
+    }
+
+    void clear();
+
+    default void disconnect() {
+        onUninstall();
+    }
 
     default <V> @NonNull SedisKey<V> key(final @NonNull String key,
                                          final @NonNull Class<V> vClass) {

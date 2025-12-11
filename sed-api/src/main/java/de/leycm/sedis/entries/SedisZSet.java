@@ -4,6 +4,7 @@ import de.leycm.sedis.SedisCache;
 import lombok.NonNull;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.reflect.Array;
 import java.util.*;
 
 public record SedisZSet<V>(
@@ -22,11 +23,11 @@ public record SedisZSet<V>(
         }
     }
 
-    public @NotNull Set<V> range(long start, long end) {
+    public @NotNull List<V> range(long start, long end) {
         return cache.zRange(key, start, end, vClass);
     }
 
-    public @NotNull Set<V> revRange(long start, long end) {
+    public @NotNull List<V> revRange(long start, long end) {
         return cache.zRevRange(key, start, end, vClass);
     }
 
@@ -43,13 +44,12 @@ public record SedisZSet<V>(
     }
 
     public void remove(@NonNull Collection<V> values) {
-        if (!values.isEmpty()) {
+        if (!values.isEmpty())
             cache.zRemove(key, values.toArray(vClassArray(values.size())));
-        }
     }
 
+    @SuppressWarnings("unchecked")
     public void remove(@NonNull V value) {
-        //noinspection unchecked
         cache.zRemove(key, value);
     }
 
@@ -75,6 +75,6 @@ public record SedisZSet<V>(
 
     @SuppressWarnings("unchecked")
     private V[] vClassArray(int size) {
-        return (V[]) java.lang.reflect.Array.newInstance(vClass, size);
+        return (V[]) Array.newInstance(vClass, size);
     }
 }

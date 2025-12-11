@@ -20,8 +20,8 @@ public interface SedisPool {
     }
 
     // can be used to use Impl functions
-    <R, P extends SedisPool> @NonNull CompletableFuture<R> async(@NonNull SyncPoolOperation<R, P> operation,
-                                                        @NonNull Class<P> pClass);
+    @NonNull <P extends SedisPool, R> CompletableFuture<R> async(@NonNull SyncPoolOperation<P, R> operation,
+                                                                 @NonNull Class<P> pClass);
 
     // ===== KEY SYSTEM =====
 
@@ -90,10 +90,10 @@ public interface SedisPool {
     <V> void zAdd(@NonNull String key,
                   @NonNull Map<V, Double> values);
 
-    <V> @NonNull Set<V> zRange(@NonNull String key, long start, long end,
+    <V> @NonNull List<V> zRange(@NonNull String key, long start, long end,
                       @NonNull Class<V> valueClass);
 
-    <V> @NonNull Set<V> zRevRange(@NonNull String key, long start, long end,
+    <V> @NonNull List<V> zRevRange(@NonNull String key, long start, long end,
                          @NonNull Class<V> valueClass);
 
     long zCard(@NonNull String key);
