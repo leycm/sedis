@@ -6,7 +6,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class CacheStorage {
+public class LocalCacheStorage {
 
     private final Map<String, String> rawCache = new ConcurrentHashMap<>();
     private final Map<String, Object> typedCache = new ConcurrentHashMap<>();
@@ -49,4 +49,5 @@ public class CacheStorage {
     public String buildCompositeKey(final @NonNull String... parts) {
         return String.join(":", parts);
     }
+
 }

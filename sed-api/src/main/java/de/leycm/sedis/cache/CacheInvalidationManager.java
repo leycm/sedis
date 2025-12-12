@@ -18,14 +18,14 @@ public class CacheInvalidationManager {
     private final Map<String, ScheduledFuture<?>> expirationTasks = new ConcurrentHashMap<>();
     private final ScheduledExecutorService scheduler;
     private final SedisPubSubManager pubSubManager;
-    private final CacheStorage cacheStorage;
+    private final LocalCacheStorage cacheStorage;
 
     private final RedisSubscriber<String> invalidateSubscriber;
     private final RedisSubscriber<String> clearSubscriber;
 
     public CacheInvalidationManager(final @NonNull ScheduledExecutorService scheduler,
                                     final @NonNull SedisPubSubManager pubSubManager,
-                                    final @NonNull CacheStorage cacheStorage) {
+                                    final @NonNull LocalCacheStorage cacheStorage) {
         this.scheduler = scheduler;
         this.pubSubManager = pubSubManager;
         this.cacheStorage = cacheStorage;

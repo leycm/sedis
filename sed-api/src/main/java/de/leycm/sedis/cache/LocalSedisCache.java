@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 
 public class LocalSedisCache implements SedisCache, Initializable {
 
-    private final CacheStorage cacheStorage;
+    private final LocalCacheStorage cacheStorage;
     private final SedisPubSubManager pubSubManager;
     private final CacheInvalidationManager invalidationManager;
 
@@ -39,7 +39,7 @@ public class LocalSedisCache implements SedisCache, Initializable {
         this.pool = pool;
         this.gson = gson;
 
-        this.cacheStorage = new CacheStorage();
+        this.cacheStorage = new LocalCacheStorage();
         this.pubSubManager = new SedisPubSubManager(pool, gson);
         this.invalidationManager = new CacheInvalidationManager(scheduler, pubSubManager, cacheStorage);
     }
