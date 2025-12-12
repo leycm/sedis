@@ -4,10 +4,12 @@ import com.google.gson.Gson;
 import de.leycm.neck.instance.Initializable;
 import de.leycm.sedis.SedisCache;
 import de.leycm.sedis.SedisPool;
+import de.leycm.sedis.builder.LocalSedisCacheBuilder;
 import de.leycm.sedis.function.RedisSubscriber;
 import de.leycm.sedis.function.SyncPoolOperation;
 import de.leycm.sedis.pubsub.SedisPubSubManager;
 import lombok.NonNull;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -29,6 +31,11 @@ public class LocalSedisCache implements SedisCache, Initializable {
     private final Executor executor;
     private final JedisPool pool;
     private final Gson gson;
+
+    @Contract(" -> new")
+    public static @NonNull LocalSedisCacheBuilder builder() {
+        return LocalSedisCacheBuilder.builder();
+    }
 
     public LocalSedisCache(final @NonNull ScheduledExecutorService scheduler,
                            final @NonNull Executor executor,
