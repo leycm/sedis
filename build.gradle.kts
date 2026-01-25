@@ -9,7 +9,6 @@ import java.util.Properties
 plugins {
     java
     `maven-publish`
-    alias(libs.plugins.shadow) apply false
     alias(libs.plugins.lombok) apply false
 }
 
